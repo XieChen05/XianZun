@@ -226,19 +226,26 @@ header h1 {
     font-weight: 600;
 }
 
-.calendar-day.has-prediction {
-    background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
-    color: white;
+.calendar-day.has-ovulation-day {
+    background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+    color: #333;
     font-weight: 600;
     position: relative;
 }
 
-.calendar-day.has-prediction::after {
-    content: '🔮';
+.calendar-day.has-ovulation-day::after {
+    content: '🌼';
     position: absolute;
     top: -5px;
     right: -5px;
     font-size: 0.9em;
+}
+
+.calendar-day.has-prediction {
+    background: linear-gradient(135deg, #FFE5F0 0%, #FFD6E8 100%);
+    color: #C44569;
+    font-weight: 600;
+    position: relative;
 }
 
 .calendar-day:not(.other-month):hover {
@@ -247,8 +254,9 @@ header h1 {
 }
 
 .calendar-legend {
-    display: flex;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
     padding: 15px 10px 5px;
     border-top: 1px solid #f0f0f0;
 }
@@ -275,8 +283,13 @@ header h1 {
     background: linear-gradient(135deg, #42A5F5 0%, #1E88E5 100%);
 }
 
+.ovulation-day-dot {
+    background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+}
+
 .prediction-dot {
-    background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+    background: linear-gradient(135deg, #FFE5F0 0%, #FFD6E8 100%);
+    border: 2px solid #FF6B9D;
 }
 
 /* 卡片通用样式 */
@@ -386,6 +399,245 @@ header h1 {
     margin-bottom: 15px;
 }
 
+/* 详细记录分析 */
+.detail-section {
+    margin: 20px 0;
+    background: #fafafa;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+    user-select: none;
+}
+
+.detail-header:hover {
+    background: rgba(255, 107, 157, 0.05);
+}
+
+.detail-header:active {
+    background: rgba(255, 107, 157, 0.1);
+}
+
+.detail-title {
+    font-size: 1.1em;
+    color: #C44569;
+    margin: 0;
+    font-weight: 600;
+}
+
+.toggle-icon {
+    font-size: 1em;
+    color: #C44569;
+    transition: transform 0.3s;
+}
+
+.toggle-icon.expanded {
+    transform: rotate(180deg);
+}
+
+.detail-content {
+    padding: 0 20px 20px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px;
+    }
+}
+
+.optional-tag {
+    font-size: 0.8em;
+    color: #999;
+    font-weight: 400;
+}
+
+.detail-group {
+    margin-bottom: 20px;
+}
+
+.detail-label {
+    display: block;
+    font-size: 0.95em;
+    color: #666;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+/* 颜色选择 */
+.color-options {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.color-option {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.color-option.selected {
+    transform: scale(1.2);
+}
+
+.color-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.color-option.selected .color-circle {
+    border-color: #FF6B9D;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #FF6B9D;
+}
+
+/* 血量选择 */
+.amount-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.amount-option {
+    flex: 1;
+    min-width: 60px;
+    padding: 12px 8px;
+    text-align: center;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.amount-option:hover {
+    border-color: #FF6B9D;
+}
+
+.amount-option.selected {
+    background: linear-gradient(135deg, #FFE5F0 0%, #FFD6E8 100%);
+    border-color: #FF6B9D;
+}
+
+.amount-option span {
+    display: block;
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 5px;
+}
+
+.pad-icon {
+    font-size: 1.5em;
+}
+
+/* 痛经选择 */
+.pain-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pain-option {
+    flex: 1;
+    min-width: 60px;
+    padding: 12px 8px;
+    text-align: center;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pain-option:hover {
+    border-color: #FF6B9D;
+}
+
+.pain-option.selected {
+    background: linear-gradient(135deg, #FFE5F0 0%, #FFD6E8 100%);
+    border-color: #FF6B9D;
+}
+
+.pain-emoji {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.pain-option span {
+    display: block;
+    font-size: 0.85em;
+    color: #666;
+}
+
+/* 症状选择 */
+.symptom-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.symptom-option {
+    padding: 10px 15px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.symptom-option:hover {
+    border-color: #FF6B9D;
+}
+
+.symptom-option.selected {
+    background: linear-gradient(135deg, #FFE5F0 0%, #FFD6E8 100%);
+    border-color: #FF6B9D;
+}
+
+.symptom-icon {
+    font-size: 1.3em;
+}
+
+.symptom-option span:last-child {
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* 备注输入 */
+.record-note {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 0.95em;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.3s;
+}
+
+.record-note:focus {
+    outline: none;
+    border-color: #FF6B9D;
+    background: white;
+}
+
 .date-group label {
     display: flex;
     align-items: center;
@@ -484,6 +736,32 @@ header h1 {
     color: #FF6B9D;
     font-size: 1em;
     margin-top: 8px;
+}
+
+.record-details {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.detail-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    font-size: 0.85em;
+    margin: 4px 4px 4px 0;
+    color: #555;
+}
+
+.detail-note {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    font-size: 0.9em;
+    color: #555;
+    font-style: italic;
 }
 
 .delete-btn {

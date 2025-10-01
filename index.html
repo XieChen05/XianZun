@@ -66,11 +66,15 @@
                         </div>
                         <div class="legend-item">
                             <span class="legend-dot ovulation-dot"></span>
-                            <span>排卵期</span>
+                            <span>易孕期</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot ovulation-day-dot"></span>
+                            <span>排卵日🌼</span>
                         </div>
                         <div class="legend-item">
                             <span class="legend-dot prediction-dot"></span>
-                            <span>预测日期</span>
+                            <span>预测经期</span>
                         </div>
                     </div>
                 </div>
@@ -94,6 +98,8 @@
                         <span class="icon">✨</span>
                         <h2>记录本次</h2>
                     </div>
+                    
+                    <!-- 日期选择 -->
                     <div class="date-inputs">
                         <div class="date-group">
                             <label for="start-date">
@@ -110,9 +116,124 @@
                             <input type="date" id="end-date" required>
                         </div>
                     </div>
+
+                    <!-- 详细记录分析 -->
+                    <div class="detail-section">
+                        <div class="detail-header" id="detail-toggle">
+                            <h3 class="detail-title">📊 记录分析 <span class="optional-tag">（可选）</span></h3>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="detail-content" id="detail-content" style="display: none;">
+                        
+                        <!-- 颜色 -->
+                        <div class="detail-group">
+                            <label class="detail-label">颜色</label>
+                            <div class="color-options">
+                                <div class="color-option" data-value="浅粉色">
+                                    <div class="color-circle" style="background: #FFB6C1;"></div>
+                                </div>
+                                <div class="color-option" data-value="鲜红色">
+                                    <div class="color-circle" style="background: #FF0000;"></div>
+                                </div>
+                                <div class="color-option" data-value="深红色">
+                                    <div class="color-circle" style="background: #8B0000;"></div>
+                                </div>
+                                <div class="color-option" data-value="橙红色">
+                                    <div class="color-circle" style="background: #FF6347;"></div>
+                                </div>
+                                <div class="color-option" data-value="褐色">
+                                    <div class="color-circle" style="background: #8B4513;"></div>
+                                </div>
+                                <div class="color-option" data-value="暗黑色">
+                                    <div class="color-circle" style="background: #2F2F2F;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 血量 -->
+                        <div class="detail-group">
+                            <label class="detail-label">血量</label>
+                            <div class="amount-options">
+                                <div class="amount-option" data-value="极少量">
+                                    <div class="pad-icon pad-1">🩸</div>
+                                    <span>极少量</span>
+                                </div>
+                                <div class="amount-option" data-value="少量">
+                                    <div class="pad-icon pad-2">🩸</div>
+                                    <span>少量</span>
+                                </div>
+                                <div class="amount-option" data-value="中等">
+                                    <div class="pad-icon pad-3">🩸</div>
+                                    <span>中等</span>
+                                </div>
+                                <div class="amount-option" data-value="较多">
+                                    <div class="pad-icon pad-4">🩸</div>
+                                    <span>较多</span>
+                                </div>
+                                <div class="amount-option" data-value="很多">
+                                    <div class="pad-icon pad-5">🩸</div>
+                                    <span>很多</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 痛经 -->
+                        <div class="detail-group">
+                            <label class="detail-label">痛经</label>
+                            <div class="pain-options">
+                                <div class="pain-option" data-value="无">
+                                    <div class="pain-emoji">😊</div>
+                                    <span>无</span>
+                                </div>
+                                <div class="pain-option" data-value="轻微">
+                                    <div class="pain-emoji">😐</div>
+                                    <span>轻微</span>
+                                </div>
+                                <div class="pain-option" data-value="中等">
+                                    <div class="pain-emoji">😣</div>
+                                    <span>中等</span>
+                                </div>
+                                <div class="pain-option" data-value="严重">
+                                    <div class="pain-emoji">😖</div>
+                                    <span>严重</span>
+                                </div>
+                                <div class="pain-option" data-value="很痛">
+                                    <div class="pain-emoji">😭</div>
+                                    <span>很痛</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 其他症状 -->
+                        <div class="detail-group">
+                            <label class="detail-label">其他</label>
+                            <div class="symptom-options">
+                                <div class="symptom-option" data-value="有血块">
+                                    <span class="symptom-icon">🩸</span>
+                                    <span>有血块</span>
+                                </div>
+                                <div class="symptom-option" data-value="有异味">
+                                    <span class="symptom-icon">👃</span>
+                                    <span>有异味</span>
+                                </div>
+                                <div class="symptom-option" data-value="有瘙痒">
+                                    <span class="symptom-icon">🤚</span>
+                                    <span>有瘙痒</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 备注 -->
+                        <div class="detail-group">
+                            <label class="detail-label">备注</label>
+                            <textarea id="record-note" class="record-note" placeholder="还想记点什么..." rows="3"></textarea>
+                        </div>
+                        </div>
+                    </div>
+
                     <button id="add-btn" class="btn-primary">
                         <span class="btn-icon">➕</span>
-                        添加记录
+                        保存记录
                     </button>
                 </div>
 
@@ -205,7 +326,7 @@
                             <ul>
                                 <li>📅 日历视图，直观展示</li>
                                 <li>🔔 提前提醒，贴心关怀</li>
-                                <li>🔵 排卵期追踪，科学备孕</li>
+                                <li>🌼 易孕期追踪，科学备孕</li>
                                 <li>🤖 AI助手，健康咨询</li>
                                 <li>💾 本地存储，隐私安全</li>
                             </ul>

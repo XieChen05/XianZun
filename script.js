@@ -19,7 +19,7 @@ class PeriodTracker {
     }
 
     // 添加新记录
-    addRecord(startDate, endDate) {
+    addRecord(startDate, endDate, details = {}) {
         const start = new Date(startDate);
         const end = new Date(endDate);
         
@@ -35,13 +35,61 @@ class PeriodTracker {
             id: Date.now(),
             startDate: startDate,
             endDate: endDate,
-            duration: duration
+            duration: duration,
+            details: details  // 添加详细信息
         };
 
         this.records.unshift(record);
         this.saveRecords();
         this.showAlert('记录添加成功！', 'success');
         return true;
+    }
+
+    // 收集详细记录数据
+    collectRecordDetails() {
+        const details = {};
+        
+        // 收集颜色
+        const selectedColor = document.querySelector('.color-option.selected');
+        if (selectedColor) {
+            details.color = selectedColor.dataset.value;
+        }
+        
+        // 收集血量
+        const selectedAmount = document.querySelector('.amount-option.selected');
+        if (selectedAmount) {
+            details.amount = selectedAmount.dataset.value;
+        }
+        
+        // 收集痛经程度
+        const selectedPain = document.querySelector('.pain-option.selected');
+        if (selectedPain) {
+            details.pain = selectedPain.dataset.value;
+        }
+        
+        // 收集症状（可多选）
+        const selectedSymptoms = document.querySelectorAll('.symptom-option.selected');
+        if (selectedSymptoms.length > 0) {
+            details.symptoms = Array.from(selectedSymptoms).map(s => s.dataset.value);
+        }
+        
+        // 收集备注
+        const note = document.getElementById('record-note').value.trim();
+        if (note) {
+            details.note = note;
+        }
+        
+        return details;
+    }
+
+    // 清空详细记录选项
+    clearRecordDetails() {
+        // 清空所有选中状态
+        document.querySelectorAll('.color-option.selected').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.amount-option.selected').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.pain-option.selected').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.symptom-option.selected').forEach(el => el.classList.remove('selected'));
+        document.getElementById('record-note').value = '';
     }
 
     // 删除记录
@@ -132,7 +180,7 @@ class PeriodTracker {
         const ovulationDay = new Date(startDate);
         ovulationDay.setDate(ovulationDay.getDate() + cycle - 14);
         
-        // 排卵期一般持续10天（排卵日前5天到后4天）
+        // 易孕期：排卵日前5天到后4天
         const ovulationStart = new Date(ovulationDay);
         ovulationStart.setDate(ovulationStart.getDate() - 5);
         
@@ -141,7 +189,8 @@ class PeriodTracker {
         
         return {
             start: ovulationStart,
-            end: ovulationEnd
+            end: ovulationEnd,
+            ovulationDay: ovulationDay  // 排卵日本身
         };
     }
 
@@ -217,11 +266,18 @@ class PeriodTracker {
                 }
             }
             
-            // 标记排卵期（如果不是例假期）
+            // 标记易孕期和排卵日（如果不是例假期）
             if (!isPeriod && this.records.length > 0) {
                 for (const record of this.records) {
                     const ovulation = this.calculateOvulationPeriod(record.startDate, avgCycle);
-                    if (this.isDateInRange(currentDate, ovulation.start, ovulation.end)) {
+                    
+                    // 检查是否是排卵日
+                    const isOvulationDay = currentDate.getTime() === ovulation.ovulationDay.getTime();
+                    
+                    if (isOvulationDay) {
+                        dayElement.classList.add('has-ovulation-day');
+                        break;
+                    } else if (this.isDateInRange(currentDate, ovulation.start, ovulation.end)) {
                         dayElement.classList.add('has-ovulation');
                         break;
                     }
@@ -234,10 +290,16 @@ class PeriodTracker {
                     dayElement.classList.add('has-prediction');
                 }
                 
-                // 标记预测的排卵期
-                if (!dayElement.classList.contains('has-prediction')) {
+                // 标记预测的易孕期和排卵日
+                if (!dayElement.classList.contains('has-prediction') && !dayElement.classList.contains('has-ovulation') && !dayElement.classList.contains('has-ovulation-day')) {
                     const predictionOvulation = this.calculateOvulationPeriod(prediction.startDate, avgCycle);
-                    if (this.isDateInRange(currentDate, predictionOvulation.start, predictionOvulation.end)) {
+                    
+                    // 检查是否是排卵日
+                    const isOvulationDay = currentDate.getTime() === predictionOvulation.ovulationDay.getTime();
+                    
+                    if (isOvulationDay) {
+                        dayElement.classList.add('has-ovulation-day');
+                    } else if (this.isDateInRange(currentDate, predictionOvulation.start, predictionOvulation.end)) {
                         dayElement.classList.add('has-ovulation');
                     }
                 }
@@ -407,15 +469,36 @@ class PeriodTracker {
             return;
         }
 
-        recordsList.innerHTML = this.records.map(record => `
+        recordsList.innerHTML = this.records.map(record => {
+            let detailsHTML = '';
+            if (record.details && Object.keys(record.details).length > 0) {
+                const d = record.details;
+                detailsHTML = '<div class="record-details">';
+                
+                if (d.color) detailsHTML += `<span class="detail-tag">🎨 ${d.color}</span>`;
+                if (d.amount) detailsHTML += `<span class="detail-tag">💧 ${d.amount}</span>`;
+                if (d.pain) detailsHTML += `<span class="detail-tag">😖 ${d.pain}</span>`;
+                if (d.symptoms && d.symptoms.length > 0) {
+                    d.symptoms.forEach(s => {
+                        detailsHTML += `<span class="detail-tag">⚠️ ${s}</span>`;
+                    });
+                }
+                if (d.note) detailsHTML += `<p class="detail-note">📝 ${d.note}</p>`;
+                
+                detailsHTML += '</div>';
+            }
+            
+            return `
             <div class="record-item">
                 <button class="delete-btn" onclick="tracker.deleteRecord(${record.id})">×</button>
                 <h3>📅 ${this.formatDate(record.startDate)}</h3>
                 <p>开始：${this.formatDate(record.startDate)}</p>
                 <p>结束：${this.formatDate(record.endDate)}</p>
                 <p class="duration">持续 ${record.duration} 天</p>
+                ${detailsHTML}
             </div>
-        `).join('');
+        `;
+        }).join('');
     }
 
     // 渲染统计信息
@@ -485,6 +568,87 @@ class PeriodTracker {
         `;
     }
 
+    // 分析最近记录的详细情况
+    analyzeRecentRecordDetails() {
+        if (this.records.length === 0) return null;
+        
+        const recentRecords = this.records.slice(0, 3); // 分析最近3条记录
+        const analysis = {
+            concerns: [],
+            suggestions: [],
+            warnings: []
+        };
+
+        recentRecords.forEach((record, index) => {
+            if (!record.details) return;
+            
+            const d = record.details;
+            const isLatest = index === 0;
+            
+            // 分析颜色
+            if (d.color) {
+                if (d.color === '暗黑色' || d.color === '褐色') {
+                    if (isLatest) {
+                        analysis.concerns.push('⚠️ 最近一次经血颜色偏暗，可能是气血不足或经血氧化');
+                        analysis.suggestions.push('💊 建议：多吃补气血的食物，如红枣、桂圆、猪肝等');
+                    }
+                } else if (d.color === '浅粉色') {
+                    if (isLatest) {
+                        analysis.concerns.push('💡 最近一次经血颜色较浅，可能是血量偏少');
+                        analysis.suggestions.push('🥗 建议：注意营养均衡，保证充足睡眠');
+                    }
+                }
+            }
+            
+            // 分析血量
+            if (d.amount) {
+                if (d.amount === '很多' || d.amount === '较多') {
+                    if (isLatest) {
+                        analysis.concerns.push('🩸 最近一次血量较多，注意观察是否有贫血症状');
+                        analysis.suggestions.push('🥩 建议：多补充铁质，如瘦肉、菠菜、黑木耳等');
+                    }
+                } else if (d.amount === '极少量') {
+                    if (isLatest) {
+                        analysis.concerns.push('💧 最近一次血量偏少，可能需要注意调理');
+                        analysis.suggestions.push('🌿 建议：保持规律作息，避免过度节食');
+                    }
+                }
+            }
+            
+            // 分析痛经
+            if (d.pain) {
+                if (d.pain === '很痛' || d.pain === '严重') {
+                    if (isLatest) {
+                        analysis.warnings.push('😭 最近一次痛经严重，请特别注意！');
+                        analysis.suggestions.push('🔥 建议：可以热敷腹部、喝红糖姜茶缓解，必要时就医');
+                    }
+                } else if (d.pain === '中等') {
+                    if (isLatest) {
+                        analysis.suggestions.push('😌 经期注意保暖，避免剧烈运动');
+                    }
+                }
+            }
+            
+            // 分析症状
+            if (d.symptoms && d.symptoms.length > 0) {
+                if (d.symptoms.includes('有血块') && isLatest) {
+                    analysis.concerns.push('🩸 最近有血块现象，可能是宫寒或气滞血瘀');
+                    analysis.suggestions.push('🫖 建议：多喝温水，可以喝益母草茶或玫瑰花茶');
+                }
+                if (d.symptoms.includes('有异味') && isLatest) {
+                    analysis.warnings.push('👃 注意个人卫生，勤换卫生用品');
+                    analysis.suggestions.push('🧼 建议：如异味持续，建议就医检查');
+                }
+                if (d.symptoms.includes('有瘙痒') && isLatest) {
+                    analysis.warnings.push('🤚 出现瘙痒症状，可能有炎症');
+                    analysis.suggestions.push('🏥 建议：保持清洁干燥，建议尽快就医');
+                }
+            }
+        });
+        
+        return analysis;
+    }
+
     // 生成页面智能提示
     async generatePageTips(pageName) {
         const tipCard = document.getElementById(`ai-tip-${pageName}`);
@@ -493,7 +657,6 @@ class PeriodTracker {
         const tipContent = tipCard.querySelector('.ai-tip-content');
         
         // 收集当前页面的数据
-        let contextData = '';
         let tips = [];
 
         if (pageName === 'calendar') {
@@ -503,52 +666,91 @@ class PeriodTracker {
             } else {
                 const avgCycle = this.calculateAverageCycle();
                 const prediction = this.predictNextPeriod();
+                const analysis = this.analyzeRecentRecordDetails();
                 
+                // 预测提醒
                 if (prediction && prediction.daysUntil !== undefined) {
                     if (prediction.daysUntil <= 2 && prediction.daysUntil >= 0) {
-                        tips.push(`⚠️ <strong>提醒</strong>：预计例假即将在${prediction.daysUntil === 0 ? '今天' : prediction.daysUntil === 1 ? '明天' : '后天'}到来，建议提前准备卫生用品。`);
+                        tips.push(`⚠️ <strong>温馨提醒</strong>：预计例假即将在${prediction.daysUntil === 0 ? '今天' : prediction.daysUntil === 1 ? '明天' : '后天'}到来，记得提前准备卫生用品哦！`);
                     } else if (prediction.daysUntil > 2 && prediction.daysUntil <= 7) {
                         tips.push(`📅 预计例假还有${prediction.daysUntil}天到来，可以开始注意身体变化。`);
                     }
                 }
                 
+                // 周期分析
                 if (avgCycle && (avgCycle < 21 || avgCycle > 35)) {
                     tips.push(`💡 <strong>注意</strong>：你的平均周期为${avgCycle}天，${avgCycle < 21 ? '偏短' : '偏长'}。如果感到不适，建议咨询医生。`);
                 }
-            }
-        } else if (pageName === 'record') {
-            // 记录页面：提示记录建议
-            if (this.records.length === 0) {
-                tips.push('📝 还没有记录哦！开始添加第一条记录，建立你的健康档案吧。');
-            } else if (this.records.length < 3) {
-                tips.push(`📊 已有${this.records.length}条记录。建议至少记录3个周期，预测会更准确哦！`);
-            } else {
-                const lastRecord = this.records[0];
-                const lastDate = new Date(lastRecord.endDate);
-                const today = new Date();
-                const daysSinceEnd = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
-                
-                if (daysSinceEnd > 40) {
-                    tips.push('💭 距离上次记录已经有一段时间了，别忘记及时更新记录哦！');
+
+                // 详细记录分析
+                if (analysis && (analysis.warnings.length > 0 || analysis.concerns.length > 0)) {
+                    tips.push('<strong>💝 健康关怀</strong>');
+                    analysis.warnings.forEach(w => tips.push(w));
+                    analysis.concerns.forEach(c => tips.push(c));
+                    if (analysis.suggestions.length > 0) {
+                        tips.push(...analysis.suggestions.slice(0, 2)); // 最多显示2条建议
+                    }
                 }
             }
-            tips.push('💡 <strong>小贴士</strong>：准确记录例假开始和结束时间，有助于更好地了解自己的身体规律。');
+        } else if (pageName === 'record') {
+            // 记录页面：提示记录建议和健康分析
+            const analysis = this.analyzeRecentRecordDetails();
+            
+            if (this.records.length === 0) {
+                tips.push('📝 还没有记录哦！开始添加第一条记录，建立你的健康档案吧。');
+                tips.push('💡 <strong>小提示</strong>：填写详细信息可以获得更准确的健康建议！');
+            } else {
+                if (this.records.length < 3) {
+                    tips.push(`📊 已有${this.records.length}条记录。建议至少记录3个周期，预测会更准确哦！`);
+                }
+                
+                // 显示健康分析
+                if (analysis && (analysis.warnings.length > 0 || analysis.concerns.length > 0 || analysis.suggestions.length > 0)) {
+                    tips.push('<strong>💝 根据您的记录，为您提供以下建议</strong>');
+                    analysis.warnings.forEach(w => tips.push(w));
+                    analysis.concerns.forEach(c => tips.push(c));
+                    analysis.suggestions.forEach(s => tips.push(s));
+                } else {
+                    const lastRecord = this.records[0];
+                    const lastDate = new Date(lastRecord.endDate);
+                    const today = new Date();
+                    const daysSinceEnd = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysSinceEnd > 40) {
+                        tips.push('💭 距离上次记录已经有一段时间了，别忘记及时更新记录哦！');
+                    } else {
+                        tips.push('💡 <strong>小贴士</strong>：填写颜色、血量、痛经等详细信息，可以获得更专业的健康建议！');
+                    }
+                }
+            }
         } else if (pageName === 'prediction') {
-            // 预测页面：分析健康状况
+            // 预测页面：分析健康状况和建议
             const prediction = this.predictNextPeriod();
             const avgCycle = this.calculateAverageCycle();
             const avgDuration = this.calculateAverageDuration();
+            const analysis = this.analyzeRecentRecordDetails();
             
             if (prediction && avgCycle) {
-                contextData = `用户的平均周期是${avgCycle}天，平均经期${avgDuration}天，距离下次例假还有${prediction.daysUntil}天。`;
-                
-                // 本地规则生成的提示
+                // 周期正常性
                 if (avgCycle >= 28 && avgCycle <= 32 && avgDuration >= 3 && avgDuration <= 7) {
                     tips.push('✅ <strong>周期正常</strong>：你的周期和经期天数都在正常范围内，继续保持健康的生活习惯！');
                 }
                 
+                // 经前期护理
                 if (prediction.daysUntil <= 7 && prediction.daysUntil >= 0) {
-                    tips.push('🌟 <strong>经前期护理</strong>：建议适当运动，保持心情愉悦，避免过度劳累和生冷食物。');
+                    tips.push('🌟 <strong>经前期护理建议</strong>');
+                    tips.push('• 适当运动，但避免剧烈运动');
+                    tips.push('• 保持心情愉悦，避免情绪波动');
+                    tips.push('• 避免过度劳累和生冷食物');
+                    tips.push('• 可以提前准备红糖姜茶');
+                }
+
+                // 详细记录分析
+                if (analysis && (analysis.warnings.length > 0 || analysis.concerns.length > 0 || analysis.suggestions.length > 0)) {
+                    tips.push('<strong>💝 健康状况分析</strong>');
+                    analysis.warnings.forEach(w => tips.push(w));
+                    analysis.concerns.forEach(c => tips.push(c));
+                    analysis.suggestions.forEach(s => tips.push(s));
                 }
             }
         }
@@ -756,10 +958,61 @@ class PeriodTracker {
                 return;
             }
 
-            if (this.addRecord(startDate, endDate)) {
+            // 收集详细记录
+            const details = this.collectRecordDetails();
+
+            if (this.addRecord(startDate, endDate, details)) {
                 this.render();
+                this.clearRecordDetails();
                 // 重新生成当前页面的智能提示
                 this.generatePageTips('record');
+            }
+        });
+
+        // 详细记录选项点击事件
+        // 颜色选择（单选）
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+
+        // 血量选择（单选）
+        document.querySelectorAll('.amount-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.amount-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+
+        // 痛经选择（单选）
+        document.querySelectorAll('.pain-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.pain-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+
+        // 症状选择（多选）
+        document.querySelectorAll('.symptom-option').forEach(option => {
+            option.addEventListener('click', () => {
+                option.classList.toggle('selected');
+            });
+        });
+
+        // 详细记录折叠/展开
+        const detailToggle = document.getElementById('detail-toggle');
+        const detailContent = document.getElementById('detail-content');
+        const toggleIcon = detailToggle.querySelector('.toggle-icon');
+
+        detailToggle.addEventListener('click', () => {
+            if (detailContent.style.display === 'none') {
+                detailContent.style.display = 'block';
+                toggleIcon.classList.add('expanded');
+            } else {
+                detailContent.style.display = 'none';
+                toggleIcon.classList.remove('expanded');
             }
         });
 
