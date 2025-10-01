@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#FF6B9D">
+    <title>仙尊月经助手</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-icon">💖</div>
+            <h1>仙尊月经助手</h1>
+            <p class="subtitle">贴心记录 · 智能预测</p>
+        </header>
+
+        <!-- 提醒通知 -->
+        <div id="reminder-notification" class="reminder-notification" style="display: none;">
+            <div class="reminder-content">
+                <span class="reminder-icon">🔔</span>
+                <div class="reminder-text">
+                    <strong>温馨提醒</strong>
+                    <p>预计例假即将到来，请做好准备</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面内容区域 -->
+        <div class="content-pages">
+            <!-- 日历页面 -->
+            <div id="page-calendar" class="page active">
+                <!-- AI智能提示卡片 -->
+                <div id="ai-tip-calendar" class="ai-tip-card" style="display: none;">
+                    <div class="ai-tip-header">
+                        <span class="ai-tip-icon">🤖</span>
+                        <span class="ai-tip-title">AI智能提示</span>
+                        <button class="ai-tip-close">×</button>
+                    </div>
+                    <div class="ai-tip-content">
+                        <p>正在分析...</p>
+                    </div>
+                </div>
+                <div class="calendar-wrapper">
+                    <div class="calendar-header">
+                        <button id="prev-month" class="month-nav-btn">◀</button>
+                        <h2 id="current-month">2025年10月</h2>
+                        <button id="next-month" class="month-nav-btn">▶</button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div class="weekday">日</div>
+                        <div class="weekday">一</div>
+                        <div class="weekday">二</div>
+                        <div class="weekday">三</div>
+                        <div class="weekday">四</div>
+                        <div class="weekday">五</div>
+                        <div class="weekday">六</div>
+                    </div>
+                    <div id="calendar-grid" class="calendar-grid">
+                        <!-- 日历日期将由JavaScript生成 -->
+                    </div>
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <span class="legend-dot period-dot"></span>
+                            <span>例假期</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot ovulation-dot"></span>
+                            <span>排卵期</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot prediction-dot"></span>
+                            <span>预测日期</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 记录页面 -->
+            <div id="page-record" class="page">
+                <!-- AI智能提示卡片 -->
+                <div id="ai-tip-record" class="ai-tip-card" style="display: none;">
+                    <div class="ai-tip-header">
+                        <span class="ai-tip-icon">🤖</span>
+                        <span class="ai-tip-title">AI智能提示</span>
+                        <button class="ai-tip-close">×</button>
+                    </div>
+                    <div class="ai-tip-content">
+                        <p>正在分析...</p>
+                    </div>
+                </div>
+                <div class="quick-add">
+                    <div class="card-header">
+                        <span class="icon">✨</span>
+                        <h2>记录本次</h2>
+                    </div>
+                    <div class="date-inputs">
+                        <div class="date-group">
+                            <label for="start-date">
+                                <span class="label-icon">📅</span>
+                                <span class="label-text">开始日期</span>
+                            </label>
+                            <input type="date" id="start-date" required>
+                        </div>
+                        <div class="date-group">
+                            <label for="end-date">
+                                <span class="label-icon">📅</span>
+                                <span class="label-text">结束日期</span>
+                            </label>
+                            <input type="date" id="end-date" required>
+                        </div>
+                    </div>
+                    <button id="add-btn" class="btn-primary">
+                        <span class="btn-icon">➕</span>
+                        添加记录
+                    </button>
+                </div>
+
+                <div class="history-wrapper">
+                    <div class="card-header">
+                        <span class="icon">📖</span>
+                        <h2>历史记录</h2>
+                    </div>
+                    <div id="records-list" class="records-container">
+                        <p class="no-data">暂无记录</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 预测页面 -->
+            <div id="page-prediction" class="page">
+                <!-- AI智能提示卡片 -->
+                <div id="ai-tip-prediction" class="ai-tip-card" style="display: none;">
+                    <div class="ai-tip-header">
+                        <span class="ai-tip-icon">🤖</span>
+                        <span class="ai-tip-title">AI智能提示</span>
+                        <button class="ai-tip-close">×</button>
+                    </div>
+                    <div class="ai-tip-content">
+                        <p>正在分析...</p>
+                    </div>
+                </div>
+                <div class="prediction-card-wrapper">
+                    <div id="prediction-result" class="prediction-card">
+                        <div class="card-header">
+                            <span class="icon">🌙</span>
+                            <h2>下次预测</h2>
+                        </div>
+                        <p class="no-data">暂无数据，请先添加记录</p>
+                    </div>
+                </div>
+
+                <div class="stats-wrapper">
+                    <div class="card-header">
+                        <span class="icon">📊</span>
+                        <h2>周期统计</h2>
+                    </div>
+                    <div id="stats-content" class="stats-content">
+                        <p class="no-data">暂无统计数据</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI助手页面 -->
+            <div id="page-ai" class="page">
+                <div class="ai-chat-wrapper">
+                    <div class="card-header">
+                        <span class="icon">🤖</span>
+                        <h2>AI健康助手</h2>
+                    </div>
+                    <div class="ai-description">
+                        <p>💬 有任何关于例假、健康的问题都可以问我哦～</p>
+                    </div>
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="message ai-message">
+                            <div class="message-avatar">🤖</div>
+                            <div class="message-content">
+                                <p>你好！我是你的健康助手。你可以问我关于月经周期、排卵期、备孕、健康管理等问题。我会尽力为你提供科学的建议！</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="user-input" class="chat-input" placeholder="输入你的问题...">
+                        <button id="send-btn" class="send-btn">
+                            <span>发送</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 我的页面 -->
+            <div id="page-mine" class="page">
+                <div class="mine-wrapper">
+                    <div class="card-header">
+                        <span class="icon">👤</span>
+                        <h2>关于应用</h2>
+                    </div>
+                    <div class="about-content">
+                        <div class="about-item">
+                            <h3>💖 仙尊月经助手</h3>
+                            <p>贴心记录 · 智能预测</p>
+                        </div>
+                        <div class="about-item">
+                            <h3>📱 功能特点</h3>
+                            <ul>
+                                <li>📅 日历视图，直观展示</li>
+                                <li>🔔 提前提醒，贴心关怀</li>
+                                <li>🔵 排卵期追踪，科学备孕</li>
+                                <li>🤖 AI助手，健康咨询</li>
+                                <li>💾 本地存储，隐私安全</li>
+                            </ul>
+                        </div>
+                        <div class="about-item">
+                            <h3>💡 使用提示</h3>
+                            <ul>
+                                <li>建议至少记录2-3个周期</li>
+                                <li>定期更新数据保持准确</li>
+                                <li>预测结果仅供参考</li>
+                                <li>AI建议仅供参考，不替代医生</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="calendar">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">日历</span>
+            </button>
+            <button class="nav-item" data-page="record">
+                <span class="nav-icon">✏️</span>
+                <span class="nav-label">记录</span>
+            </button>
+            <button class="nav-item" data-page="prediction">
+                <span class="nav-icon">🔮</span>
+                <span class="nav-label">预测</span>
+            </button>
+            <button class="nav-item" data-page="ai">
+                <span class="nav-icon">🤖</span>
+                <span class="nav-label">AI助手</span>
+            </button>
+            <button class="nav-item" data-page="mine">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">我的</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
